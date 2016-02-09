@@ -22,6 +22,12 @@ file01-001.txt  file01-003.txt  file01-006.txt  file01-010.txt  file02-01.txt   
 8   file01-###.txt      1-4 6 9-11
 ```
 
+ - The first column denotes the number of files in a group of files.
+ - The second column denotes the pattern of the file names.
+ - The third column specifies the IDs of the files that can be either a range such as `1-4`
+or a single number. You need to replace the `#` with the IDs to get the file names.
+
+
 # Tests
 lss has some inline tests written using [doctest](https://docs.python.org/2/library/doctest.html).
 To run the tests execute `lss --test`
