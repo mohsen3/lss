@@ -23,5 +23,5 @@ file01-001.txt  file01-003.txt  file01-006.txt  file01-010.txt  file02-01.txt   
 ```
 
 # Tests
-lss has some inline tests written using [[doctest|https://docs.python.org/2/library/doctest.html]].
+lss has some inline tests written using [doctest](https://docs.python.org/2/library/doctest.html).
 To run the tests execute `lss --test`
