@@ -72,11 +72,11 @@ def compactForm(nums):
 def formatGrouped(i, j, group):
     """Formats a list of files with numbers starting from colum i to column j in compact form.
     >>> formatGrouped(4, 5, ['file01.txt', 'file02.txt', 'file03.txt'])
-    '3   file%2d.txt \\t1-3'
+    '3   file##.txt \\t1-3'
     """
     nums = map(lambda s: int(s[i:j + 1]), group)
     name = group[0]
-    return "%-3d %s%%%dd%s \t%s" % (len(group), name[:i], j - i + 1, name[j + 1:], compactForm(nums))
+    return "%-3d %s%s%s \t%s" % (len(group), name[:i], '#' * (j - i + 1), name[j + 1:], compactForm(nums))
 
 def formatSingle(fileName):
     """Formats a single file.
@@ -91,7 +91,7 @@ def tryNumbers(i, group):
     >>> tryNumbers(1, ['file01.txt', 'file02.txt', 'file03.txt'])
     
     >>> tryNumbers(4, ['file01.txt', 'file02.txt', 'file03.txt'])
-    ['3   file%2d.txt \\t1-3']
+    ['3   file##.txt \\t1-3']
     """
     if len(group) <= 1:
         return map(formatSingle, group)
@@ -153,3 +153,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
