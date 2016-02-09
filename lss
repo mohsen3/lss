@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+
+def groupByIndex(i, list):
+    """Groups the list of input strings by the i^th char.
+    Returns a tuple in which the first element is the list of
+    items that are too short (i.e., does not have index i) and
+    the second one is the list of groups.
+
+    >>> groupByIndex(1, ['abc', 'cbc', 'bc', 'ccc', 'd', 'cc'])
+    (['d'], [['bc', 'ccc', 'cc'], ['abc', 'cbc']])
+    """
+    dict = {}
+    shorter = []
+    for item in list:
+        if len(item) > i:
+            group = dict.get(item[i], [])
+            group.append(item)
+            dict[item[i]] = group
+        else:
+            shorter.append(item)
+    return (shorter, dict.values())
+
+def groupByLength(list):
+    """Groups the list of input strings by the length of the strings.
+    >>> groupByLength(['aaa', 'abc', 'a', 'bc', 'ab'])
+    [['a'], ['bc', 'ab'], ['aaa', 'abc']]
+    """
+    dict = {}
+    for item in list:
+        dict[len(item)] = dict.get(len(item), []) + [item]
+    return dict.values()
+
+def flatten(list):
+    """Flattens the input list, i.e., given a list of list of items,
+    returns the list of items.
+    >>> flatten([[1], [2, 3], [4, 5, 6], []])
+    [1, 2, 3, 4, 5, 6]
+    """
+    return [item for sublist in list for item in sublist]
+
+def allTheSame(items):
+    """If all the items of the input list are the same,
+    returns True, otherwise, returns False.
+    >>> allTheSame([1, 2, 3])
+    False
+    >>> allTheSame([1, 1, 1])
+    True
+    """
+    return len(set(items)) == 1
+
+def compactForm(nums):
+    """Converts a list of numbers into the compact representation of the numbers.
+    >>> compactForm([1, 2, 3, 4])
+    '1-4'
+    >>> compactForm([1, 2, 5, 3])
+    '1-3 5'
+    >>> compactForm([1, 2, 5, 7, 8, 9])
+    '1-2 5 7-9'
+    """
+    nums.sort()
+    formatted = []
+    i = 0
+    while i < len(nums):
+        count = 0
+        while i + count < len(nums) and nums[i] + count == nums[i + count]:
+            count = count + 1
+        formatted.append(str(nums[i]) + ('' if count == 1 else '-' + str(nums[i] + count - 1)))
+        i = i + count
+
+    return ' '.join(formatted)
+
+def formatGrouped(i, j, group):
+    """Formats a list of files with numbers starting from colum i to column j in compact form.
+    >>> formatGrouped(4, 5, ['file01.txt', 'file02.txt', 'file03.txt'])
+    '3   file%2d.txt \\t1-3'
+    """
+    nums = map(lambda s: int(s[i:j + 1]), group)
+    name = group[0]
+    return "%-3d %s%%%dd%s \t%s" % (len(group), name[:i], j - i + 1, name[j + 1:], compactForm(nums))
+
+def formatSingle(fileName):
+    """Formats a single file.
+    """
+    return "%-3d %s" % (1, fileName)
+
+def tryNumbers(i, group):
+    """Tries to find a compact representation for the group of file names,
+    assuming there is a number starting from column i.
+    Returns a list containing a single item upon success and
+    None upon failure.
+    >>> tryNumbers(1, ['file01.txt', 'file02.txt', 'file03.txt'])
+    
+    >>> tryNumbers(4, ['file01.txt', 'file02.txt', 'file03.txt'])
+    ['3   file%2d.txt \\t1-3']
+    """
+    if len(group) <= 1:
+        return map(formatSingle, group)
+
+    # if the length of the strings are different,
+    # try it on each subgroup of the same length
+    if not allTheSame(map(len, group)):
+        return None
+
+    # There exists a j, i < j <= len(item)
+    # such that item[i:j} are all digits and
+    # item[j:] are all the same for all item in group
+    l = len(group[0])
+    for j in range(i, l):
+        if all(map(lambda s: s[j].isdigit(), group)):
+            if allTheSame(map(lambda s: s[j + 1:], group)):
+                return [formatGrouped(i, j, group)]
+        else:
+            return None
+
+def lss0(i, fileNames):
+    """Helper function that handles the recursive call.
+    """
+    result = tryNumbers(i, fileNames)
+    if result:
+        return result
+
+    shorter, groups = groupByIndex(i, fileNames)
+    return map(formatSingle, shorter) + flatten([lss0(i + 1, g) for g in groups])
+
+def lss(fileList):
+    return flatten([lss0(0, g) for g in groupByLength(fileList)])
+
+def main():
+    import sys
+    if len(sys.argv) == 1:
+        # Current dir if no arg is specified
+        arg = '.'
+    elif len(sys.argv) == 2:
+        arg = sys.argv[1]
+    else:
+        print 'Usage:', __file__, '/path/to/dir'
+        sys.exit()
+
+    if arg == '--test':
+        # Hidden feature that is not mentioned on the 'Usage'.
+        # Test the module function using the inline example of the comments.
+        import doctest
+        doctest.testmod()
+        print 'Finished testing!'
+    else:
+        import os
+        if os.path.isdir(arg):
+            fileNames = os.listdir(arg)
+            print '\n'.join(lss(fileNames))
+        else:
+            print 'Not a directory', arg
+            sys.exit(1)
+
+if __name__ == '__main__':
+    main()
